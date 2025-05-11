@@ -24,8 +24,8 @@ export default function BookingForm({ bookingId }) {
   const success = useSelector((state) => state.booking.success);
 
   const [formData, setFormData] = useState({
-    CustomerName: "gags",
-    CustomerEmail: "gadfg@sgds.com",
+    CustomerName: "",
+    CustomerEmail: "",
     BookingDate: "",
     BookingType: "Full Day",
     BookingSlot: "",
@@ -34,17 +34,45 @@ export default function BookingForm({ bookingId }) {
   });
 
   useEffect(() => {
+    if (!isEditMode) {
+      setFormData({
+        CustomerName: "",
+        CustomerEmail: "",
+        BookingDate: "",
+        BookingType: "Full Day",
+        BookingSlot: "",
+        FromTime: "",
+        ToTime: "",
+      });
+      dispatch({ type: "booking/resetCurrentBooking" });
+    }
+  }, [isEditMode, dispatch]);
+
+  useEffect(() => {
     if (isEditMode) {
       dispatch(fetchBookingById(bookingId));
     }
   }, [dispatch, bookingId, isEditMode]);
 
   useEffect(() => {
+    if (!isEditMode) return;
+
     if (existingBooking) {
+      let formattedDate = "";
+
+      if (existingBooking.BookingDate) {
+        const utcDate = new Date(existingBooking.BookingDate);
+
+        const istOffsetInMs = 330 * 60 * 1000;
+        const istDate = new Date(utcDate.getTime() + istOffsetInMs);
+
+        formattedDate = istDate.toISOString().split("T")[0];
+      }
+
       setFormData({
         CustomerName: existingBooking.CustomerName || "",
         CustomerEmail: existingBooking.CustomerEmail || "",
-        BookingDate: existingBooking.BookingDate || "",
+        BookingDate: formattedDate || "",
         BookingType: existingBooking.BookingType || "Full Day",
         BookingSlot: existingBooking.BookingSlot || "",
         FromTime: existingBooking.FromTime || "",
@@ -67,8 +95,9 @@ export default function BookingForm({ bookingId }) {
     if (success) {
       toast.success(isEditMode ? "Booking updated!" : "Booking created!");
       navigate("/booking");
+      dispatch({ type: "booking/addOrUpdateBookingSuccess" });
     }
-  }, [success]);
+  }, [success, isEditMode, navigate, dispatch]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -128,7 +157,7 @@ export default function BookingForm({ bookingId }) {
     }
 
     if (isEditMode) {
-      dispatch(addOrUpdateBooking({ BookingId: bookingId, data: formData }));
+      dispatch(addOrUpdateBooking({ BookingId: bookingId, ...formData }));
     } else {
       dispatch(addOrUpdateBooking(formData));
     }

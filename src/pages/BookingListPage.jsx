@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchBookings,
@@ -8,10 +8,12 @@ import {
   selectBookings,
   selectBookingLoading,
   selectBookingError,
+  selectDeleteSuccess,
 } from "../features/booking/bookingSelectors";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { toast } from "react-toastify";
+import { resetDeleteSuccess } from "../features/booking/bookingSlice";
 
 export default function BookingListPage() {
   const dispatch = useDispatch();
@@ -19,6 +21,10 @@ export default function BookingListPage() {
   const bookings = useSelector(selectBookings);
   const loading = useSelector(selectBookingLoading);
   const error = useSelector(selectBookingError);
+  const deleteSuccess = useSelector(selectDeleteSuccess);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
 
   useEffect(() => {
     dispatch(fetchBookings());
@@ -30,14 +36,15 @@ export default function BookingListPage() {
     }
   }, [error]);
 
+  useEffect(() => {
+    if (deleteSuccess) {
+      toast.success("Booking deleted successfully");
+      dispatch(resetDeleteSuccess());
+    }
+  }, [deleteSuccess, dispatch]);
+
   const handleEdit = (id) => {
     navigate(`/booking/edit/${id}`);
-  };
-
-  const handleDelete = (id) => {
-    if (confirm("Are you sure?")) {
-      dispatch(deleteBooking(id));
-    }
   };
 
   const formatBookingDetail = (booking) => {
@@ -74,6 +81,11 @@ export default function BookingListPage() {
     return date.toLocaleDateString("en-IN", options);
   };
 
+  const handleDelete = (id) => {
+    setSelectedBookingId(id);
+    setShowDeleteModal(true);
+  };
+
   return (
     <div>
       <Navbar />
@@ -81,7 +93,10 @@ export default function BookingListPage() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-bold">Your Bookings</h2>
           <button
-            onClick={() => navigate("/booking/add")}
+            onClick={() => {
+              navigate("/booking/add");
+              dispatch({ type: "booking/resetCurrentBooking" });
+            }}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
           >
             + Add Booking
@@ -171,6 +186,39 @@ export default function BookingListPage() {
           </div>
         )}
       </div>
+      {showDeleteModal && (
+        <div
+          className="fixed inset-0 bg-[rgba(0,0,0,0.4)] flex items-center justify-center z-50"
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div
+            className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-semibold mb-4">Confirm Deletion</h2>
+            <p className="mb-6">
+              Are you sure you want to delete this booking?
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  dispatch(deleteBooking(selectedBookingId));
+                  setShowDeleteModal(false);
+                }}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

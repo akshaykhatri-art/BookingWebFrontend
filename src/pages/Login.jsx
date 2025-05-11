@@ -13,8 +13,8 @@ export default function Login() {
   const { error, isAuthenticated, loading } = useSelector(selectAuth);
 
   const [form, setForm] = useState({
-    email: "akshaykhatri22@gmail.com",
-    password: "Akshay@22",
+    email: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
 
