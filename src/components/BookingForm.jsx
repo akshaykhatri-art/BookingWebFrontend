@@ -21,10 +21,11 @@ export default function BookingForm({ bookingId }) {
   const existingBooking = useSelector(selectCurrentBooking);
   const loading = useSelector(selectBookingLoading);
   const error = useSelector(selectBookingError);
+  const success = useSelector((state) => state.booking.success);
 
   const [formData, setFormData] = useState({
-    CustomerName: "",
-    CustomerEmail: "",
+    CustomerName: "gags",
+    CustomerEmail: "gadfg@sgds.com",
     BookingDate: "",
     BookingType: "Full Day",
     BookingSlot: "",
@@ -54,9 +55,20 @@ export default function BookingForm({ bookingId }) {
 
   useEffect(() => {
     if (error) {
-      toast.error(`Booking Error: ${error}`);
+      if (typeof error === "object") {
+        Object.values(error).forEach((msg) => toast.error(msg));
+      } else {
+        toast.error(`Booking Error: ${error}`);
+      }
     }
   }, [error]);
+
+  useEffect(() => {
+    if (success) {
+      toast.success(isEditMode ? "Booking updated!" : "Booking created!");
+      navigate("/booking");
+    }
+  }, [success]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -64,21 +76,69 @@ export default function BookingForm({ bookingId }) {
       ...prev,
       [name]: value,
     }));
+
+    if (name === "BookingType") {
+      if (value === "Full Day") {
+        setFormData((prev) => ({
+          ...prev,
+          BookingSlot: "",
+          FromTime: "",
+          ToTime: "",
+        }));
+      } else if (value === "Half Day") {
+        setFormData((prev) => ({
+          ...prev,
+          FromTime: "",
+          ToTime: "",
+        }));
+      } else if (value === "Custom") {
+        setFormData((prev) => ({
+          ...prev,
+          BookingSlot: "",
+        }));
+      }
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    dispatch(clearBookingError());
 
-    if (isEditMode) {
-      dispatch(clearBookingError());
-      dispatch(addOrUpdateBooking({ BookingId: bookingId, data: formData }));
-    } else {
-      dispatch(clearBookingError());
-      dispatch(addOrUpdateBooking(formData));
+    if (
+      !formData.CustomerName ||
+      !formData.CustomerEmail ||
+      !formData.BookingDate ||
+      !formData.BookingType
+    ) {
+      toast.error("All fields are required.");
+      return;
     }
 
-    navigate("/booking");
+    if (formData.BookingType === "Half Day" && !formData.BookingSlot) {
+      toast.error("Booking Slot is required for Half Day.");
+      return;
+    }
+
+    if (
+      formData.BookingType === "Custom" &&
+      (!formData.FromTime || !formData.ToTime)
+    ) {
+      toast.error("From and To Time are required for Custom booking.");
+      return;
+    }
+
+    if (isEditMode) {
+      dispatch(addOrUpdateBooking({ BookingId: bookingId, data: formData }));
+    } else {
+      dispatch(addOrUpdateBooking(formData));
+    }
   };
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearBookingError());
+    };
+  }, []);
 
   const showSlot = formData.BookingType === "Half Day";
   const showTime = formData.BookingType === "Custom";
@@ -89,7 +149,7 @@ export default function BookingForm({ bookingId }) {
       className="space-y-4 bg-white p-6 rounded shadow"
     >
       <div>
-        <label className="block font-semibold">Customer Name</label>
+        <label className="block font-semibold">Customer Name*</label>
         <input
           type="text"
           name="CustomerName"
@@ -101,7 +161,7 @@ export default function BookingForm({ bookingId }) {
       </div>
 
       <div>
-        <label className="block font-semibold">Customer Email</label>
+        <label className="block font-semibold">Customer Email*</label>
         <input
           type="email"
           name="CustomerEmail"
@@ -113,7 +173,7 @@ export default function BookingForm({ bookingId }) {
       </div>
 
       <div>
-        <label className="block font-semibold">Booking Date</label>
+        <label className="block font-semibold">Booking Date*</label>
         <input
           type="date"
           name="BookingDate"
@@ -125,7 +185,7 @@ export default function BookingForm({ bookingId }) {
       </div>
 
       <div>
-        <label className="block font-semibold">Booking Type</label>
+        <label className="block font-semibold">Booking Type*</label>
         <select
           name="BookingType"
           value={formData.BookingType}
@@ -140,7 +200,7 @@ export default function BookingForm({ bookingId }) {
 
       {showSlot && (
         <div>
-          <label className="block font-semibold">Booking Slot</label>
+          <label className="block font-semibold">Booking Slot*</label>
           <select
             name="BookingSlot"
             value={formData.BookingSlot}
@@ -158,7 +218,7 @@ export default function BookingForm({ bookingId }) {
       {showTime && (
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block font-semibold">Booking From Time</label>
+            <label className="block font-semibold">Booking From Time*</label>
             <input
               type="time"
               name="FromTime"
@@ -169,7 +229,7 @@ export default function BookingForm({ bookingId }) {
             />
           </div>
           <div>
-            <label className="block font-semibold">Booking To Time</label>
+            <label className="block font-semibold">Booking To Time*</label>
             <input
               type="time"
               name="ToTime"
@@ -182,13 +242,23 @@ export default function BookingForm({ bookingId }) {
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="bg-blue-600 text-white px-6 py-2 rounded"
-      >
-        {isEditMode ? "Update Booking" : "Create Booking"}
-      </button>
+      <div className="flex justify-between items-center">
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-blue-600 text-white px-6 py-2 rounded"
+        >
+          {isEditMode ? "Update Booking" : "Create Booking"}
+        </button>
+
+        <button
+          type="button"
+          className="bg-gray-600 text-white px-6 py-2 rounded"
+          onClick={() => navigate("/booking")}
+        >
+          Back to List
+        </button>
+      </div>
     </form>
   );
 }

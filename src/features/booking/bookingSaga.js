@@ -22,7 +22,6 @@ import {
 } from "./bookingAPI";
 
 function* fetchBookingsSaga() {
-  debugger;
   try {
     const data = yield call(apiGetBookings);
     yield put(fetchBookingsSuccess(data));
@@ -42,7 +41,9 @@ function* addOrUpdateBookingSaga(action) {
     yield put(addOrUpdateBookingSuccess());
     yield put(fetchBookingsRequest());
   } catch (error) {
-    yield put(addOrUpdateBookingFailure(error.message));
+    const errorData = error.response?.data;
+    const message = errorData?.error || errorData?.message || error.message;
+    yield put(addOrUpdateBookingFailure(message));
   }
 }
 

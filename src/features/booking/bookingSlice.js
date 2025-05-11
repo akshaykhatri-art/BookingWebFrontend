@@ -24,13 +24,17 @@ const bookingSlice = createSlice({
 
     addOrUpdateBookingRequest: (state) => {
       state.loading = true;
+      state.error = null;
+      state.success = false;
     },
     addOrUpdateBookingSuccess: (state) => {
       state.loading = false;
+      state.success = true;
     },
     addOrUpdateBookingFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
+      state.success = false;
     },
 
     deleteBookingRequest: (state) => {
@@ -57,6 +61,7 @@ const bookingSlice = createSlice({
     },
     clearBookingError: (state) => {
       state.error = null;
+      state.success = false;
     },
   },
 });
