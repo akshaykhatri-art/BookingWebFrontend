@@ -25,6 +25,7 @@ export default function BookingListPage() {
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(5);
 
   useEffect(() => {
     dispatch(fetchBookings());
@@ -107,7 +108,7 @@ export default function BookingListPage() {
           <p className="text-center text-gray-500">Loading...</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+            <table className="min-w-full mb-10 bg-white shadow-md rounded-lg overflow-hidden">
               <thead className="bg-gray-100">
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
@@ -131,7 +132,7 @@ export default function BookingListPage() {
                 </tr>
               </thead>
               <tbody>
-                {bookings.map((booking, index) => (
+                {bookings.slice(0, visibleCount).map((booking, index) => (
                   <tr
                     key={booking._id}
                     className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
@@ -171,18 +172,18 @@ export default function BookingListPage() {
                     </td>
                   </tr>
                 ))}
-                {bookings.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan="6"
-                      className="px-6 py-4 text-center text-gray-500"
-                    >
-                      No bookings found.
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
+            {visibleCount < bookings.length && (
+              <div className="text-center mt-4">
+                <button
+                  onClick={() => setVisibleCount((prev) => prev + 5)}
+                  className="bg-blue-600 mb-10 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                >
+                  Load More
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
