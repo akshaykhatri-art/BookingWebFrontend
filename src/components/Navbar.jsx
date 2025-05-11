@@ -14,7 +14,9 @@ export default function Navbar() {
   return (
     <nav className="bg-blue-600 text-white px-6 py-4 flex justify-between items-center">
       <div className="w-1/3" />
-      <div className="text-xl font-semibold w-1/3 text-center">Booking App</div>
+      <div className="text-xl font-semibold w-1/3 text-center">
+        Smart Booking App
+      </div>
       <div className="w-1/3 text-right">
         <button
           onClick={handleLogout}

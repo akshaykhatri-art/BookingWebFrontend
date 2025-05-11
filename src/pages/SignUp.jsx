@@ -64,48 +64,58 @@ export default function SignUp() {
   }, [error, successMessage, dispatch, navigate]);
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-10">
-      <FormInput
-        label="First Name*"
-        name="firstName"
-        value={form.firstName}
-        onChange={handleChange}
-      />
-      <FormInput
-        label="Last Name*"
-        name="lastName"
-        value={form.lastName}
-        onChange={handleChange}
-      />
-      <FormInput
-        label="Email*"
-        name="email"
-        type="email"
-        value={form.email}
-        onChange={handleChange}
-      />
-      <FormInput
-        label="Password"
-        name="password"
-        type={showPassword ? "text" : "password"}
-        value={form.password}
-        onChange={handleChange}
-        showPasswordToggle
-        onTogglePassword={() => setShowPassword(!showPassword)}
-        showPassword={showPassword}
-      />
-      <button
-        type="submit"
-        className="w-full py-2 bg-blue-600 text-white rounded"
-      >
-        Sign Up
-      </button>
-      <p className="mt-4 text-center">
-        Already have an account?{" "}
-        <Link to="/login" className="text-blue-600 hover:underline">
-          Login
-        </Link>
-      </p>
-    </form>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
+          Smart Booking App
+        </h1>
+        <p className="text-center text-gray-500 mb-6">
+          Create your account to start booking.
+        </p>
+        <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-10">
+          <FormInput
+            label="First Name*"
+            name="firstName"
+            value={form.firstName}
+            onChange={handleChange}
+          />
+          <FormInput
+            label="Last Name*"
+            name="lastName"
+            value={form.lastName}
+            onChange={handleChange}
+          />
+          <FormInput
+            label="Email*"
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+          />
+          <FormInput
+            label="Password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={form.password}
+            onChange={handleChange}
+            showPasswordToggle
+            onTogglePassword={() => setShowPassword(!showPassword)}
+            showPassword={showPassword}
+          />
+          <button
+            type="submit"
+            className="w-full py-2 bg-blue-600 text-white rounded"
+          >
+            Sign Up
+          </button>
+          <p className="mt-4 text-center">
+            Already have an account?{" "}
+            <Link to="/login" className="text-blue-600 hover:underline">
+              Login
+            </Link>
+          </p>
+        </form>
+      </div>
+    </div>
   );
 }
